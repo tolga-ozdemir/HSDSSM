@@ -1,47 +1,23 @@
-# TRQ3DNet
+# HSDSSM
 
-The implementation of paper ["TRQ3DNet: A 3D Quasi-Recurrent and Transformer
-Based Network for Hyperspectral Image Denoising"](https://doi.org/10.3390/rs1010000)
+The implementation of the paper: ""
+This project is forked from [TRQ3DNet](https://github.com/LiPang/TRQ3DNet).
 
-<img src="imgs/trq3d.png">
 
-## Introduction
+**The HSDSSM Codes have not yet been added. It will be added soon.**
 
-We propose a new deep neural network termed TRQ3DNet which combines convolutional neural network (CNN) and transformer for hyperspectral image (HSI) denoising. The network consists of two branches. One is built by 3D quasi-recurrent blocks, including convolution and quasi-recurrent pooling operation. Specifically, the 3D convolution can extract the spatial correlation within a band, and spectral correlation between different bands, while the quasi-recurrent pooling operation is able to exploit global correlation along the spectrum. The other branch is composed of a series of Uformer blocks. The Uformer block uses window-based multi-head self-attention (W-MSA) mechanism and the locally enhanced feed forward network (LeFF) to exploit the global and local spatial features. To fuse the features extracted by the two branches, we develop a bidirectional integration bridge (BI bridge) for better preserving the image feature information. Experimental results on synthetic and real HSI data show the superiority of our proposed network. For example, in the case of Gaussian noise with sigma 70, the PSNR value of our method significantly increases about 0.8 compared with other state-of-the-art methods.
 
-## Highlights
-
-* We compare our model with other methods in Gaussian and complex denoising cases on the ICVL dataset. The results show that our
- model out-performs other state-of-art methods in all complex cases.
-
-<div align=center>
-<img src="imgs/ICVL_Gauss.png" height="100%" width="100%"/>
-
-<img src="imgs/ICVL_Complex.png" height="100%" width="100%"/>
-</div>
-
-* We also evaluate our model on two real HSI datasets, i.e., Indian Pines and Urban. We adopt
- the visualization and one no-reference quality assessment, which
- evaluates the image quality according to the changes in kurtosis values of noisy images. The lower
- the score, the higher the quality of the recovered image. We show some visulization
- comparison results, from which it can be seen that our model achieves better performance than other methods.
-
-<div align=center>
-<img src="imgs/Indian_pines.png" height="100%" width="100%"/>
-
-<img src="imgs/Urban.png" height="100%" width="100%"/>
-</div>
 
 ## Getting Started
 
 ### 1. Preparing your training/testing datasets
-Here, we give an example for single scale data preparation of ICVL.
+Here, we give an example of the single-scale data preparation for ICVL.
 
 Firstly, download ICVL hyperspectral images into ```data/ICVL/filefolder``` folder and 
 make sure your initial data are in the following structure. The train-validation-test 
 split can be found in ```train_fns.txt``` , ```validation_fns_*.txt``` and 
-```test_fns_*.txt```. (Note we split the 101 testing data into two parts for Gaussian 
-and complex denoising respectively.) You can create the split by yourself or by the function 
+```test_fns_*.txt```. (Note, we split the 101 testing data into two parts for Gaussian 
+and complex denoising, respectively.) You can create the split by yourself or by the function 
 ```creat_train_val_test``` in ```hsi_data.py```.
 
 
@@ -57,7 +33,7 @@ data/ICVL
 ```
 
 Modify and run the python code ```hsi_data.py``` to split the data and create training set. 
-Then you will get data in the following structure
+Then you will get data in the following structure.
 
 ```angular2html
 data/ICVL
@@ -77,8 +53,8 @@ data/ICVL
 │    └──ICVL64_31.npz
 ```
 
-Modify and run the matlab code ```matlab/HSIValData.m``` and ```matlab/HSITestData.m``` to create validation and testing sets.
-Then you will get data in the following structure
+Modify and run the Matlab code ```Matlab/HSIValData.m``` and ```Matlab/HSITestData.m``` to create validation and testing sets.
+Then you will get data in the following structure.
 
 ```angular2html
 data/ICVL
@@ -145,4 +121,4 @@ Image Denoising. Remote Sens. 2022, 1, 0.
 
 ## Acknowledgement
 
-This repo is built mainly based on [QRNN3D](https://github.com/Vandermode/QRNN3D) and [Uformer](https://github.com/ZhendongWang6/Uformer). We thank a lot for their contributions to the community.
+This repo is mainly based on [TRQ3DNet](https://github.com/LiPang/TRQ3DNet). We thank them immensely for their contributions to the community.
