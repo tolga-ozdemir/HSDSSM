@@ -98,26 +98,20 @@ data/ICVL
 Read and modify ```basefolder``` and ```savedir``` in ```hsi_test.py```.
 
 * [Blind Gaussian noise removal]:   
-```python hsi_test.py -a trq3d -p gauss -r -rp ./checkpoints/trq3d/gauss/model_epoch_50_118454.pth --gpu-ids 0```
+```python hsi_test.py -a hsdssm -p gauss -r -rp ./checkpoints/hsdssm/gauss/model_epoch_<epoch_id>.pth --gpu-ids 0```
 
 * [Mixture noise removal]:  
-```python hsi_test.py -a trq3d -p complex -r -rp ./checkpoints/trq3d/complex/model_epoch_100_159904.pth --gpu-ids 0```
+```python hsi_test.py -a hsdssm -p complex -r -rp ./checkpoints/hsdssm/complex/model_epoch_<epoch_id>.pth --gpu-ids 0```
 
-The result can be found in ```result/trq3d/gauss/res_model_epoch_50_118454/result_ICVL_512.csv``` and ```result/trq3d/complex/res_model_epoch_100_159904/result_ICVL_512.csv```.
+The result can be found in ```result/hsdssm/gauss/res_model_epoch_<epoch_id>/result_ICVL_512.csv``` and ```result/hsdssm/complex/res_model_epoch_<epoch_id>/result_ICVL_512.csv```.
 
 ### 3. Training from scratch
 * Training a blind Gaussian model firstly by  
-```python hsi_denoising_gauss.py -a trq3d -p gauss -d ./data/ICVL/trainset/ICVL64_31.npz -v ./data/ICVL/valset_gauss --gpu-ids 0```
+```python hsi_denoising_gauss.py -a hsdssm -p gauss -d ./data/ICVL/trainset/ICVL64_31.npz -v ./data/ICVL/valset_gauss --gpu-ids 0```
 
 * Using the pretrained Gaussian model as initialization to train a complex model:  
-```python hsi_denoising_complex.py -a trq3d -p complex -d ./data/ICVL/trainset/ICVL64_31.npz -v ./data/ICVL/valset_complex -r -rp checkpoints/trq3d/gauss/model_epoch_50_118454.pth --gpu-ids 0```
+```python hsi_denoising_complex.py -a hsdssm -p complex -d ./data/ICVL/trainset/ICVL64_31.npz -v ./data/ICVL/valset_complex -r -rp checkpoints/hsdssm/gauss/model_epoch_<epoch_id>.pth --gpu-ids 0```
 
-## Citation
-
-```angular2html
-Pang, L.; Gu, W.; Cao, X. TRQ3DNet: A 3D Quasi-Recurrent and Transformer Based Network for Hyperspectral 
-Image Denoising. Remote Sens. 2022, 1, 0.
-```
 
 ## Acknowledgement
 
