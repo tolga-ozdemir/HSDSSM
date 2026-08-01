@@ -1,3 +1,41 @@
-from .tssm import hssm 
-from .tssm import hssm_24
+from .qrnn import QRNNREDC3D
+from .trq3d import TRQ3D
 
+# from .ssm import hssm
+# from .ssm import hssm_24
+# from .ssumamba import ssumamba
+from .hsdssmpp import hssm_8
+from .hsdssmpp import hssm
+from .hsdssmpp import hssm_24
+from .hsdssmpp import hssm_32
+from .munet import munet
+from .hcanet import hcanet
+
+# from .ssumamba import ssumamba, ssumamba_sscs
+from .lamamba import lamamba
+
+
+def trq3d():
+    net = TRQ3D(
+        in_channels=1,
+        in_channels_tr=31,
+        channels=16,
+        channels_tr=16,
+        med_channels=31,
+        num_half_layer=4,
+        sample_idx=[1, 3],
+        has_ad=True,
+        input_resolution=(512, 512),
+    )
+    net.use_2dconv = False
+    net.bandwise = False
+    return net
+
+
+def qrnn3d():
+    net = QRNNREDC3D(
+        in_channels=1, channels=16, num_half_layer=5, sample_idx=[1, 3], has_ad=True
+    )
+    net.use_2dconv = False
+    net.bandwise = False
+    return net

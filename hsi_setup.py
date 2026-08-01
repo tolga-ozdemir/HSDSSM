@@ -5,50 +5,93 @@ import models
 import numpy as np
 from utility import *
 
-model_names = sorted(name for name in models.__dict__
-                     if name.islower() and not name.startswith("__") and callable(models.__dict__[name]))
+model_names = sorted(
+    name
+    for name in models.__dict__
+    if name.islower() and not name.startswith("__") and callable(models.__dict__[name])
+)
+
 
 def train_options(parser):
     def _parse_str_args(args):
-        str_args = args.split(',')
+        str_args = args.split(",")
         parsed_args = [int(str_arg) for str_arg in str_args if int(str_arg) >= 0]
         return parsed_args
 
-    parser.add_argument('--prefix', '-p', type = str, default='temp', help='prefix')
-    parser.add_argument('--arch', '-a', metavar='ARCH', required=False, choices=model_names,
-                        help = 'model architecture: ' + ' | '.join(model_names), default='qrnn3d' )
-    parser.add_argument('--lr', type=float, default=1e-3, help='learning rate, default=1e-3')
-    parser.add_argument('--wd', type=float, default=0, help='weight decay. default = 0')
-    parser.add_argument('--loss', type=str, default='l2', choices=['l1','l2','smooth_l1','ssim','l2_ssim','char'],
-                        help='loss')
-    parser.add_argument("--task_id", '-t', type=int, default=0)
-    parser.add_argument('--beta', '-b', type=float, default=0.95)
-    parser.add_argument("--epochs", '-e', type=int, default=-1)
-    parser.add_argument('--init', type=str, default='kn',choices=['kn', 'ku', 'xn', 'xu', 'edsr'],
-                        help='which init scheme to choose.')
-    parser.add_argument('--no-cuda', action='store_true', help='disable cuda?')
-    parser.add_argument('--no-log', action='store_true', help='disable logger?')
-    parser.add_argument('--threads', type=int, default=0,
-                        help='number of threads for data loader to use')
-    parser.add_argument('--seed', type=int, default=2018,
-                        help='random seed to use. default=2018')
-    parser.add_argument('--resume', '-r', action='store_true',
-                        help='resume from checkpoint')
-    parser.add_argument('--no-ropt', '-nro', action='store_true',
-                            help='not resume optimizer')
-    parser.add_argument('--chop', action='store_true',
-                            help='forward chop')
-    parser.add_argument('--slice', action='store_true',
-                            help='forward chop')
-    parser.add_argument('--resumePath', '-rp', type=str,
-                        default=None, help='checkpoint to use.')
-    parser.add_argument('--ImportancePath', '-ip', type=str, default=None, help='importance to use')
-    parser.add_argument('--dataroot', '-d', type=str,
-                        default='./data/ICVL/trainset/ICVL64_31.npz', help='data root')
-    parser.add_argument('--valroot', '-v', type=str,
-                        default='./data/ICVL/valset_gauss', help='validation set root')
-    parser.add_argument('--clip', type=float, default=1e6, help='gradient clip threshold')
-    parser.add_argument('--gpu-ids', type=str, default='0', help='gpu ids, ex:0,1,2,3')
+    parser.add_argument("--prefix", "-p", type=str, default="temp", help="prefix")
+    parser.add_argument(
+        "--arch",
+        "-a",
+        metavar="ARCH",
+        required=False,
+        choices=model_names,
+        help="model architecture: " + " | ".join(model_names),
+        default="qrnn3d",
+    )
+    parser.add_argument(
+        "--lr", type=float, default=1e-3, help="learning rate, default=1e-3"
+    )
+    parser.add_argument("--wd", type=float, default=0, help="weight decay. default = 0")
+    parser.add_argument(
+        "--loss",
+        type=str,
+        default="l2",
+        choices=["l1", "l2", "smooth_l1", "ssim", "l2_ssim", "char"],
+        help="loss",
+    )
+    parser.add_argument("--task_id", "-t", type=int, default=0)
+    parser.add_argument("--beta", "-b", type=float, default=0.95)
+    parser.add_argument("--epochs", "-e", type=int, default=-1)
+    parser.add_argument(
+        "--init",
+        type=str,
+        default="kn",
+        choices=["kn", "ku", "xn", "xu", "edsr"],
+        help="which init scheme to choose.",
+    )
+    parser.add_argument("--no-cuda", action="store_true", help="disable cuda?")
+    parser.add_argument("--no-log", action="store_true", help="disable logger?")
+    parser.add_argument(
+        "--threads",
+        type=int,
+        default=0,
+        help="number of threads for data loader to use",
+    )
+    parser.add_argument(
+        "--seed", type=int, default=2018, help="random seed to use. default=2018"
+    )
+    parser.add_argument(
+        "--resume", "-r", action="store_true", help="resume from checkpoint"
+    )
+    parser.add_argument(
+        "--no-ropt", "-nro", action="store_true", help="not resume optimizer"
+    )
+    parser.add_argument("--chop", action="store_true", help="forward chop")
+    parser.add_argument("--slice", action="store_true", help="forward chop")
+    parser.add_argument(
+        "--resumePath", "-rp", type=str, default=None, help="checkpoint to use."
+    )
+    parser.add_argument(
+        "--ImportancePath", "-ip", type=str, default=None, help="importance to use"
+    )
+    parser.add_argument(
+        "--dataroot",
+        "-d",
+        type=str,
+        default="./data/ICVL/trainset/ICVL64_31.npz",
+        help="data root",
+    )
+    parser.add_argument(
+        "--valroot",
+        "-v",
+        type=str,
+        default="./data/ICVL/valset_gauss",
+        help="validation set root",
+    )
+    parser.add_argument(
+        "--clip", type=float, default=1e6, help="gradient clip threshold"
+    )
+    parser.add_argument("--gpu-ids", type=str, default="0", help="gpu ids, ex:0,1,2,3")
     opt = parser.parse_args()
     opt.gpu_ids = _parse_str_args(opt.gpu_ids)
     return opt
@@ -71,75 +114,80 @@ class Engine(object):
         self.__setup()
 
     def __setup(self):
-        self.basedir = os.path.join('checkpoints', self.opt.arch)
+        self.basedir = os.path.join("checkpoints", self.opt.arch)
         if not os.path.exists(self.basedir):
             os.makedirs(self.basedir)
 
         self.best_psnr = 0
         self.best_loss = 1e6
-        self.epoch = 0
+        self.epoch = 0  # start from epoch 0 or last checkpoint epoch
         self.iteration = 0
 
         cuda = not self.opt.no_cuda
-        self.device = 'cuda' if cuda else 'cpu'
-        print('Cuda Acess: %d' % cuda)
+        self.device = "cuda" if cuda else "cpu"
+        print("Cuda Acess: %d" % cuda)
         if cuda and not torch.cuda.is_available():
             raise Exception("No GPU found, please run without --cuda")
 
-        # === 1. Create model ===
+        """Model"""
         print("=> creating model '{}'".format(self.opt.arch))
         self.net = models.__dict__[self.opt.arch.lower()]()
 
-        # === 2. Initialize parameters ===
+        """Params Init"""
         init_params(self.net, init_type=self.opt.init)
 
-        # === 3. Handle multi-GPU or single-GPU setup ===
         if cuda and len(self.opt.gpu_ids) > 1:
             from models.sync_batchnorm import DataParallelWithCallback
+
             self.net = DataParallelWithCallback(self.net, device_ids=self.opt.gpu_ids)
-        elif cuda and len(self.opt.gpu_ids) == 1:
+        if cuda and len(self.opt.gpu_ids) == 1:
             torch.cuda.set_device(self.opt.gpu_ids[0])
 
-        # === 4. Move model to device ===
+        """Loss Function"""
+        self.criterion = init_criterion(self.opt.loss)
+        print("criterion: ", self.criterion)
+
         if cuda:
             self.net.to(self.device)
-
-        # === 5. Initialize loss and move to device ===
-        self.criterion = init_criterion(self.opt.loss)
-        print('criterion: ', self.criterion)
-        if cuda:
             self.criterion = self.criterion.to(self.device)
 
-        # === 6. Logger setup ===
+        """Logger Setup"""
         log = not self.opt.no_log
         if log:
-            self.writer = get_summary_writer(os.path.join(self.basedir, 'logs'), self.opt.prefix)
+            self.writer = get_summary_writer(
+                os.path.join(self.basedir, "logs"), self.opt.prefix
+            )
 
-        # === 7. Optimizer (after model is on the correct device) ===
+        """Optimization Setup"""
         self.optimizer = torch.optim.Adam(
-            self.net.parameters(), lr=self.opt.lr, weight_decay=self.opt.wd, amsgrad=False
+            self.net.parameters(),
+            lr=self.opt.lr,
+            weight_decay=self.opt.wd,
+            amsgrad=False,
         )
 
-        # === 8. Resume model and optimizer if needed ===
+        """Resume previous model"""
         if self.opt.resume:
-            print('==> Loading checkpoint...')
+            # Load checkpoint.
+            print("==> Loading checkpoint...")
             self.load(self.opt.resumePath, not self.opt.no_ropt)
         else:
-            print('==> Building model..')
-
+            print("==> Building model..")
+            # print(self.net)
 
     def load(self, resumePath=None, load_opt=True):
-        model_best_path = os.path.join(self.basedir, self.prefix, 'model_latest.pth')
-        print('==> Resuming from checkpoint %s..' % resumePath)
-        assert os.path.isdir('checkpoints'), 'Error: no checkpoint directory found!'
-        checkpoint = torch.load(resumePath or model_best_path, map_location=self.device)
+        model_best_path = os.path.join(self.basedir, self.prefix, "model_latest.pth")
+        print("==> Resuming from checkpoint %s.." % resumePath)
+        assert os.path.isdir("checkpoints"), "Error: no checkpoint directory found!"
+        checkpoint = checkpoint = torch.load(
+            resumePath or model_best_path, map_location=lambda storage, loc: storage
+        )
         #### comment when using memnet
-        self.epoch = checkpoint['epoch']
-        self.iteration = checkpoint['iteration']
+        self.epoch = checkpoint["epoch"]
+        self.iteration = checkpoint["iteration"]
         if load_opt:
-            self.optimizer.load_state_dict(checkpoint['optimizer'])
-        self.get_net().load_state_dict(checkpoint['net'])
-
+            self.optimizer.load_state_dict(checkpoint["optimizer"])
+        self.get_net().load_state_dict(checkpoint["net"])
 
     def get_net(self):
         if len(self.opt.gpu_ids) > 1:
@@ -148,6 +196,7 @@ class Engine(object):
             return self.net
 
     """Forward Functions"""
+
     def forward_chop(self, x, base=32):
         if len(x.shape) == 5:
             n, c, b, h, w = x.size()
@@ -165,9 +214,9 @@ class Engine(object):
 
         inputs = [
             x[..., 0:h_size, 0:w_size],
-            x[..., 0:h_size, (w - w_size):w],
-            x[..., (h - h_size):h, 0:w_size],
-            x[..., (h - h_size):h, (w - w_size):w]
+            x[..., 0:h_size, (w - w_size) : w],
+            x[..., (h - h_size) : h, 0:w_size],
+            x[..., (h - h_size) : h, (w - w_size) : w],
         ]
 
         outputs = [self.net(input_i) for input_i in inputs]
@@ -177,32 +226,38 @@ class Engine(object):
 
         output[..., 0:h_half, 0:w_half] += outputs[0][..., 0:h_half, 0:w_half]
         output_w[..., 0:h_half, 0:w_half] += 1
-        output[..., 0:h_half, w_half:w] += outputs[1][..., 0:h_half, (w_size - w + w_half):w_size]
+        output[..., 0:h_half, w_half:w] += outputs[1][
+            ..., 0:h_half, (w_size - w + w_half) : w_size
+        ]
         output_w[..., 0:h_half, w_half:w] += 1
-        output[..., h_half:h, 0:w_half] += outputs[2][..., (h_size - h + h_half):h_size, 0:w_half]
+        output[..., h_half:h, 0:w_half] += outputs[2][
+            ..., (h_size - h + h_half) : h_size, 0:w_half
+        ]
         output_w[..., h_half:h, 0:w_half] += 1
-        output[..., h_half:h, w_half:w] += outputs[3][..., (h_size - h + h_half):h_size, (w_size - w + w_half):w_size]
+        output[..., h_half:h, w_half:w] += outputs[3][
+            ..., (h_size - h + h_half) : h_size, (w_size - w + w_half) : w_size
+        ]
         output_w[..., h_half:h, w_half:w] += 1
 
         output /= output_w
 
         return output
 
-    def forward_slice(self, inputs, base = 31):
+    def forward_slice(self, inputs, base=31):
         if len(inputs.shape) == 5:
             n, c, b, h, w = inputs.size()
         else:
             n, b, h, w = inputs.size()
         output = torch.zeros_like(inputs)
         cnt = torch.zeros_like(inputs)
-        for bb in range(0, b-base+1, base):
-            x = inputs[...,bb:bb+base,:,:]
-            output[...,bb:bb+base,:,:] += self.net(x)
-            cnt[...,bb:bb+base,:,:] += 1
+        for bb in range(0, b - base + 1, base):
+            x = inputs[..., bb : bb + base, :, :]
+            output[..., bb : bb + base, :, :] += self.net(x)
+            cnt[..., bb : bb + base, :, :] += 1
         if b % base != 0:
-            x = inputs[..., b-base:b, :, :]
-            output[...,b-base:b,:,:] += self.net(x)
-            cnt[...,b-base:b,:,:] += 1
+            x = inputs[..., b - base : b, :, :]
+            output[..., b - base : b, :, :] += self.net(x)
+            cnt[..., b - base : b, :, :] += 1
         output = output / cnt
         return output
 
@@ -230,24 +285,24 @@ class Engine(object):
             output = torch.zeros_like(inputs)
             cnt = torch.zeros_like(inputs)
             for bb in range(b - base + 1):
-                x = inputs[:, :, bb:bb + base, :, :]
+                x = inputs[:, :, bb : bb + base, :, :]
                 if h % win_size != 0 or w % win_size != 0:
-                    output[:, :, bb:bb + base, :, :] += self.forward_chop(x, win_size)
+                    output[:, :, bb : bb + base, :, :] += self.forward_chop(x, win_size)
                 else:
-                    output[:, :, bb:bb + base, :, :] += self.net(x)
-                cnt[:, :, bb:bb + base, :, :] += 1
+                    output[:, :, bb : bb + base, :, :] += self.net(x)
+                cnt[:, :, bb : bb + base, :, :] += 1
             output = output / cnt
         else:
             n, b, h, w = inputs.size()
             output = torch.zeros_like(inputs)
             cnt = torch.zeros_like(inputs)
             for bb in range(b - base + 1):
-                x = inputs[:, bb:bb + base, :, :]
+                x = inputs[:, bb : bb + base, :, :]
                 if h % win_size != 0 or w % win_size != 0:
-                    output[:, bb:bb + base, :, :] += self.forward_chop(x, win_size)
+                    output[:, bb : bb + base, :, :] += self.forward_chop(x, win_size)
                 else:
-                    output[:, bb:bb + base, :, :] += self.net(x)
-                cnt[:, bb:bb + base, :, :] += 1
+                    output[:, bb : bb + base, :, :] += self.net(x)
+                cnt[:, bb : bb + base, :, :] += 1
             output = output / cnt
 
         return output
@@ -295,7 +350,7 @@ class Engine(object):
         if self.get_net().bandwise:
             O = []
             for ti, (i, t) in enumerate(zip(inputs.split(1, 1), targets.split(1, 1))):
-                if self.net._get_name() == 'HSID':
+                if self.net._get_name() == "HSID":
                     o = self.forward((i, inputs, ti))
                 else:
                     o = self.forward(i)
@@ -309,6 +364,11 @@ class Engine(object):
         else:
             outputs = self.forward(inputs)
             time_end = time.time()
+            if outputs.shape != targets.shape:
+                raise RuntimeError(
+                    f"Shape mismatch before loss: outputs={tuple(outputs.shape)}, "
+                    f"targets={tuple(targets.shape)}"
+                )
             loss = self.criterion(outputs, targets)
             if train:
                 loss.backward()
@@ -320,46 +380,59 @@ class Engine(object):
         return outputs, loss_data, total_norm, timecost
 
     """Training Functions"""
+
     def train(self, train_loader):
-        print('\nEpoch: %d' % self.epoch)
+        print("\nEpoch: %d" % self.epoch)
         self.net.train()
         train_loss = 0
         avg_loss = 0
         for batch_idx, (inputs, targets) in enumerate(train_loader):
             if not self.opt.no_cuda:
                 inputs, targets = inputs.to(self.device), targets.to(self.device)
-            outputs, loss_data, total_norm, time_cost = self.__step(True, inputs, targets)
+            outputs, loss_data, total_norm, time_cost = self.__step(
+                True, inputs, targets
+            )
 
             train_loss += loss_data
             avg_loss = train_loss / (batch_idx + 1)
 
             if not self.opt.no_log:
                 self.writer.add_scalar(
-                    os.path.join(self.prefix, 'train_loss'), loss_data, self.iteration)
+                    os.path.join(self.prefix, "train_loss"), loss_data, self.iteration
+                )
                 self.writer.add_scalar(
-                    os.path.join(self.prefix, 'train_avg_loss'), avg_loss, self.iteration)
+                    os.path.join(self.prefix, "train_avg_loss"),
+                    avg_loss,
+                    self.iteration,
+                )
 
             self.iteration += 1
-            progress_bar(batch_idx, len(train_loader), 'AvgLoss: %.4e | Loss: %.4e | Norm: %.4e'% (avg_loss, loss_data, total_norm))
+            progress_bar(
+                batch_idx,
+                len(train_loader),
+                "AvgLoss: %.4e | Loss: %.4e | Norm: %.4e"
+                % (avg_loss, loss_data, total_norm),
+            )
 
         self.epoch += 1
         if not self.opt.no_log:
             self.writer.add_scalar(
-                os.path.join(self.prefix, 'train_loss_epoch'), avg_loss, self.epoch)
-
+                os.path.join(self.prefix, "train_loss_epoch"), avg_loss, self.epoch
+            )
 
     """Validation Functions"""
+
     def validate(self, valid_loader, name):
         self.net.eval()
         validate_loss = 0
         total_psnr = 0
-        print('[i] Eval dataset {}...'.format(name))
+        print("[i] Eval dataset {}...".format(name))
         with torch.no_grad():
             for batch_idx, (inputs, targets) in enumerate(valid_loader):
                 if not self.opt.no_cuda:
                     inputs, targets = inputs.to(self.device), targets.to(self.device)
 
-                outputs, loss_data, _, time_cost= self.__step(False, inputs, targets)
+                outputs, loss_data, _, time_cost = self.__step(False, inputs, targets)
                 psnr = np.mean(cal_bwpsnr(outputs, targets))
                 # Visualize3D(outputs[0].detach().cpu().numpy())
                 # Visualize3D(targets[0].detach().cpu().numpy())
@@ -369,29 +442,86 @@ class Engine(object):
                 total_psnr += psnr
                 avg_psnr = total_psnr / (batch_idx + 1)
 
-                progress_bar(batch_idx, len(valid_loader), 'Loss: %.4e | PSNR: %.4f'
-                             % (avg_loss, avg_psnr))
+                progress_bar(
+                    batch_idx,
+                    len(valid_loader),
+                    "Loss: %.4e | PSNR: %.4f" % (avg_loss, avg_psnr),
+                )
 
         if not self.opt.no_log:
             self.writer.add_scalar(
-                os.path.join(self.prefix, name, 'val_loss_epoch'), avg_loss, self.epoch)
+                os.path.join(self.prefix, name, "val_loss_epoch"), avg_loss, self.epoch
+            )
             self.writer.add_scalar(
-                os.path.join(self.prefix, name, 'val_psnr_epoch'), avg_psnr, self.epoch)
+                os.path.join(self.prefix, name, "val_psnr_epoch"), avg_psnr, self.epoch
+            )
 
         return avg_psnr, avg_loss
 
+    def normalize(self, multispectral_image_pca):
+        return (
+            (multispectral_image_pca - multispectral_image_pca.min())
+            / (multispectral_image_pca.max() - multispectral_image_pca.min())
+        ) * 255
+
     """Testing Functions"""
-    def test(self, test_loader, filename=None, savedir=None, saveimgdir=None, verbose=True):
-        #attention! only one sample per batch
+
+    def test(
+        self,
+        test_loader,
+        type_text,
+        filename=None,
+        savedir=None,
+        saveimgdir=None,
+        verbose=True,
+    ):
+        # attention! only one sample per batch
+        import cv2
+        import os
+
         self.net.eval()
         dataset = test_loader.dataset.dataset
-
+        if saveimgdir:
+            os.makedirs(saveimgdir, exist_ok=True)
         res_arr = np.zeros((len(test_loader), 5))
         with torch.no_grad():
             for batch_idx, (inputs, targets) in enumerate(test_loader):
                 if not self.opt.no_cuda:
                     inputs, targets = inputs.cuda(), targets.cuda()
                 outputs, loss_data, _, time_cost = self.__step(False, inputs, targets)
+
+                # -------- Added Code ---------------------------
+                if batch_idx == 0 and saveimgdir:
+                    temp_output = self.normalize(
+                        torch2numpy(outputs, self.net.use_2dconv)
+                    )
+                    temp_input = self.normalize(
+                        torch2numpy(inputs, self.net.use_2dconv)
+                    )
+                    temp_target = self.normalize(
+                        torch2numpy(targets, self.net.use_2dconv)
+                    )
+                    filedir = os.path.basename(dataset.filenames[batch_idx]).split(".")[
+                        0
+                    ]
+                    cv2.imwrite(
+                        os.path.join(
+                            saveimgdir, filedir + "_" + type_text + "_input.jpg"
+                        ),
+                        temp_input[:, :, 15],
+                    )
+                    cv2.imwrite(
+                        os.path.join(
+                            saveimgdir, filedir + "_" + type_text + "_output.jpg"
+                        ),
+                        temp_output[:, :, 15],
+                    )
+                    cv2.imwrite(
+                        os.path.join(saveimgdir, filedir + "_" + type_text + "_gt.jpg"),
+                        temp_target[:, :, 15],
+                    )
+                # ------------------------------------------------
+
                 res_arr[batch_idx, 3] = loss_data
                 res_arr[batch_idx, 4] = time_cost
                 res_arr[batch_idx, :3] = MSIQA(outputs, targets)
@@ -403,31 +533,31 @@ class Engine(object):
                     #              % (psnr, ssim))
                     print(batch_idx, psnr, ssim, sam, loss_data, time_cost)
 
-                if saveimgdir:
-                    filedir = os.path.join(saveimgdir, os.path.basename(dataset.filenames[batch_idx]).split('.')[0])
-                    outpath = os.path.join(filedir, '{}.mat'.format(self.opt.arch))
-                    if not os.path.exists(filedir):
-                        os.makedirs(filedir)
-                    if not os.path.exists(outpath):
-                        savemat(outpath, {'R_hsi': torch2numpy(outputs, self.net.use_2dconv)})
+                # if saveimgdir:
+                #     filedir = os.path.join(saveimgdir, os.path.basename(dataset.filenames[batch_idx]).split('.')[0])
+                #     outpath = os.path.join(filedir, '{}.mat'.format(self.opt.arch))
+                #     if not os.path.exists(filedir):
+                #         os.makedirs(filedir)
+                #     if not os.path.exists(outpath):
+                #         savemat(outpath, {'R_hsi': torch2numpy(outputs, self.net.use_2dconv)})
 
         if savedir:
             if not os.path.exists(savedir):
                 os.makedirs(savedir)
             filepath = os.path.join(savedir, filename)
-            suffix = filepath.split('.')[-1]
-            if suffix == 'npy':
+            suffix = filepath.split(".")[-1]
+            if suffix == "npy":
                 np.save(filepath, res_arr)
-            elif suffix == 'txt':
+            elif suffix == "txt":
                 np.savetxt(filepath, res_arr)
             else:
-                raise 'invalid file format'
+                raise "invalid file format"
         if verbose:
             print((res_arr.mean(0)).tolist())
         return res_arr
 
     def image_denosing(self, test_loader, saveimgdir):
-        #attention! only one sample per batch
+        # attention! only one sample per batch
         self.net.eval()
         dataset = test_loader.dataset.dataset
         with torch.no_grad():
@@ -437,7 +567,7 @@ class Engine(object):
                 if self.get_net().bandwise:
                     O = []
                     for time, i in enumerate(inputs.split(1, 1)):
-                        if self.net._get_name() == 'HSID':
+                        if self.net._get_name() == "HSID":
                             o = self.forward((i, inputs, time))
                         else:
                             o = self.forward(i)
@@ -455,24 +585,30 @@ class Engine(object):
                     output_np = output_np.squeeze(0)
                 if saveimgdir:
                     R_hsi = output_np.transpose((1, 2, 0))
-                    dirpath = os.path.join(saveimgdir, os.path.basename(dataset.filenames[batch_idx]).split('.')[0])
+                    dirpath = os.path.join(
+                        saveimgdir,
+                        os.path.basename(dataset.filenames[batch_idx]).split(".")[0],
+                    )
                     if not os.path.exists(dirpath):
                         os.makedirs(dirpath)
-                    savepath = os.path.join(dirpath,
-                                    self.opt.arch + '.mat')
-                    savemat(savepath, {'R_hsi': R_hsi})
+                    savepath = os.path.join(dirpath, self.opt.arch + ".mat")
+                    savemat(savepath, {"R_hsi": R_hsi})
 
     """Model Saving Functions"""
+
     def save_checkpoint(self, model_out_path=None, **kwargs):
         if not model_out_path:
-            model_out_path = os.path.join(self.basedir, self.prefix, "model_epoch_%d_%d.pth" % (
-                self.epoch, self.iteration))
+            model_out_path = os.path.join(
+                self.basedir,
+                self.prefix,
+                "model_epoch_%d_%d.pth" % (self.epoch, self.iteration),
+            )
 
         state = {
-            'net': self.get_net().state_dict(),
-            'optimizer': self.optimizer.state_dict(),
-            'epoch': self.epoch,
-            'iteration': self.iteration,
+            "net": self.get_net().state_dict(),
+            "optimizer": self.optimizer.state_dict(),
+            "epoch": self.epoch,
+            "iteration": self.iteration,
         }
 
         state.update(kwargs)

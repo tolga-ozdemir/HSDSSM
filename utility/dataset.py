@@ -118,9 +118,10 @@ def make_dataset(opt, train_transform, target_transform, common_transform, batch
 
     train_dataset = ImageTransformDataset(dataset, train_transform, target_transform)
 
-    train_loader = torch.utils.data.DataLoader(train_dataset,
-                              batch_size=batch_size or opt.batchSize, shuffle=True,
-                              num_workers=opt.threads, pin_memory=not opt.no_cuda, worker_init_fn=worker_init_fn)
+    # train_loader = torch.utils.data.DataLoader(train_dataset,
+    #                           batch_size=batch_size or opt.batchSize, shuffle=True,
+    #                           num_workers=opt.threads, pin_memory=not opt.no_cuda, worker_init_fn=worker_init_fn)
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, num_workers=opt.threads)
 
     return train_loader
 

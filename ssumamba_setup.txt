@@ -1,0 +1,11 @@
+change "python-graphviz" to "graphviz" in the ssumamba.yaml file
+conda env create --prefix /mnt/data/conda_envs/myenv --file ssumamba.yaml
+conda activate /mnt/data/conda_envs/myenv/
+python -m pip uninstall -y torch torchvision torchaudio triton   nvidia-cublas-cu12 nvidia-cuda-cupti-cu12 nvidia-cuda-nvrtc-cu12   nvidia-cuda-runtime-cu12 nvidia-cudnn-cu12 nvidia-cufft-cu12   nvidia-curand-cu12 nvidia-cusolver-cu12 nvidia-cusparse-cu12   nvidia-nvtx-cu12 nvidia-nvjitlink-cu12
+python -m pip install --index-url https://download.pytorch.org/whl/cu118   torch==2.1.1 torchvision==0.16.1 torchaudio==2.1.1
+git clone https://github.com/OpenGVLab/VideoMamba
+cd VideoMamba
+pip install -e causal-conv1d/
+pip install -e mamba/
+pip install "nnunetv2==2.2.1"
+pip install torchnet

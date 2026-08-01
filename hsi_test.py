@@ -56,7 +56,7 @@ if __name__ == '__main__':
                         num_workers=0, pin_memory=cuda
                     )
         filename = data + '.npy'
-        engine.test(mat_loader, savedir=savedir, filename=filename)
+        engine.test(mat_loader, data, savedir=savedir, filename=filename, saveimgdir=None)
 
     # Complex
     basefolder = './data/ICVL/testset_complex'
@@ -80,7 +80,7 @@ if __name__ == '__main__':
                         num_workers=0, pin_memory=cuda
                     )
         filename = data + '.npy'
-        engine.test(mat_loader, savedir=savedir, filename=filename)
+        engine.test(mat_loader, data, savedir=savedir, filename=filename, saveimgdir=None)
 
     '''Collect Result'''
     prefix = dataset[0].split('_')[0]+'_'+dataset[0].split('_')[1]

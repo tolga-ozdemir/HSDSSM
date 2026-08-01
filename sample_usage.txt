@@ -1,0 +1,8 @@
+python hsi_denosing_gauss.py -a ssumamba -p gauss -d ./data/ICVL/trainset/ICVL64_31.npz -v ./data/ICVL/valset_gauss --gpu-ids 0 --loss char --lr 1e-4
+python hsi_denosing_complex.py -a ssumamba -p complex -d ./data/ICVL/trainset/ICVL64_31.npz -v ./data/ICVL/valset_complex -r -rp checkpoints/lamamba/gauss/model_epoch_50_118454.pth  --gpu-ids 0 --loss char
+python hsi_test.py -a hssm -p gauss -r -rp ./checkpoints/lamamba/complex/model_epoch_100_159904.pth --gpu-ids 0 --loss char
+
+python hsi_denosing_mehsi.py -a ssumamba -p ssumamba --lr 1e-4 --batch-size 2 -r -rp checkpoints/ssumamba/ssumamba/model_latest.pth
+python hsi_test_mehsi.py -a ssumamba -p ssumamba --loss char -r -rp checkpoints/ssumamba/ssumamba/model_latest.pth --gpu-ids 0
+
+python denoise_paviau.py -a lamamba -p complex -r -rp checkpoints/lamamba/complex/model_latest.pth --gpu-ids 0 --output result/paviau_lamamba_complex.mat
