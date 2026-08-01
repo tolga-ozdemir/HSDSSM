@@ -1,6 +1,6 @@
 # HSDSSM
 
-The implementation of the paper titled "HSDSSM" will be included once it is released and indexed.
+This repository provides the implementation of **HSDSSM: A Hybrid Spectral Denoising State-Space Model for Hyperspectral Images**, published at IEEE IGARSS 2025. The original HSDSSM implementation and pretrained weights remain available in `models/ssm` and `checkpoints/hsdssm`, respectively.
 
 This repo is forked from ["TRQ3DNet: A 3D Quasi-Recurrent and Transformer
 Based Network for Hyperspectral Image Denoising"](https://github.com/LiPang/TRQ3DNet)
@@ -9,7 +9,11 @@ Based Network for Hyperspectral Image Denoising"](https://github.com/LiPang/TRQ3
 
 ## Introduction
 
-We propose a new model, HSDSMM, which combines a transformer and a state space model sequentially for hyperspectral image (HSI) denoising. 
+HSDSSM combines spectral self-attention, spectral state-space modeling, and lightweight gating in a uniform encoder-decoder architecture for hyperspectral image (HSI) denoising.
+
+### HSDSSM++
+
+HSDSSM++ is the extension of the conference-published HSDSSM model. It replaces the uniform block design with an asymmetric encoder-decoder: Spectral Self-Attention Gating Blocks extract fine-grained spectral features in the encoder, while Spectral State-Space Model Gating Blocks reconstruct long-range spectral information in the decoder. Its implementation and pretrained weights are available in `models/hsdssmpp` and `checkpoints/hsdssm++`, respectively.
 
 
 ## Getting Started
